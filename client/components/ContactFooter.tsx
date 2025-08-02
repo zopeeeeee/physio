@@ -5,7 +5,7 @@ export default function ContactFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 mb-12 items-start">
           {/* Brand/Description/Feedback */}
           <div>
-            <h2 className="text-6xl font-bold mb-6 font-montserrat">Flexrite World</h2>
+            <h2 className="text-7xl font-bold mb-6 font-playfair">Flexrite World</h2>
             <p className="text-gray-300 text-2lg leading-relaxed mb-8 max-w-md ">
               Physiotherapist, we are dedicated to providing expert physiotherapy care tailored to your unique needs. Our experienced team combines evidence-based treatments with personalized attention to help you recover, move better, and live pain-free. Your health is our priority – from rehabilitation to wellness, we're with you every step of the way.
             </p>
@@ -54,7 +54,7 @@ export default function ContactFooter() {
           </div>
           <div className="mt-2 text-right">
             <div className="text-2xl font-bold mb-2 text-center">XXXXXX XXXX</div>
-            <div className="font-montserrat text-3xl font-bold mb-1 text-[#E6D6FB] text-center">Call Flexrite World</div>
+            <div className="font-playfair text-3xl font-bold mb-1 text-[#E6D6FB] text-center">Call Flexrite World</div>
           </div>
         </div>
       </div>
