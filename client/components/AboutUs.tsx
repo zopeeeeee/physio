@@ -77,19 +77,19 @@ export default function AboutUs() {
               {/* Testimonial Circles */}
               <div className="flex -space-x-4">
                 <div className="w-16 h-16 lg:w-20 lg:h-20 bg-flexrite-gray-light rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
-                  <img src="/placeholder.svg" alt="User 1" className="w-full h-full object-cover" />
+                  <img src="/das.jpg" alt="User 1" className="w-full h-full object-cover" />
                 </div>
                 <div className="w-16 h-16 lg:w-20 lg:h-20 bg-flexrite-gray-light rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
-                  <img src="/placeholder.svg" alt="User 2" className="w-full h-full object-cover" />
+                  <img src="/Gupta.avif" alt="User 2" className="w-full h-full object-cover" />
                 </div>
                 <div className="w-16 h-16 lg:w-20 lg:h-20 bg-flexrite-gray-light rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
-                  <img src="/placeholder.svg" alt="User 3" className="w-full h-full object-cover" />
+                  <img src="/Nandi.avif" alt="User 3" className="w-full h-full object-cover" />
                 </div>
               </div>
 
               {/* Watch Intro Button */}
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-black border border-purple-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-900 transition-colors">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-black border border-purple-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
                   <svg 
                     className="w-6 h-6 text-white ml-1" 
                     fill="currentColor" 

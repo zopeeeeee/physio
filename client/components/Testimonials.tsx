@@ -42,10 +42,10 @@ export default function Testimonials() {
     return out;
   };
   return (
-    <section className="w-full">
+    <section className="w-full overflow-x-hidden">
       {/* Top Section - The Flexrite Experience (White) */}
       <div className="bg-white w-full">
-        <div className="py-16 lg:py-24 px-0 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+      <div className="py-16 lg:py-24 px-0 w-full">
           {/* Section Header */}
           <div className="text-center mb-8">
             <h2 className="font-playfair font-bold text-black text-4xl lg:text-7xl mb-4">
@@ -91,15 +91,15 @@ export default function Testimonials() {
                 }
               ].map((person, index) => (
                 <div key={index} className="flex flex-col">
-                  <div className="bg-gray-100 rounded-3xl p-6 lg:p-6 min-h-[340px] lg:min-h-[400px] w-[180px] lg:w-[220px] flex flex-col items-center">
+                  <div className="bg-black rounded-3xl p-6 lg:p-6 min-h-[340px] lg:min-h-[400px] w-[180px] lg:w-[220px] flex flex-col items-center">
                     {/* Profile Image */}
                     <img src={person.image} alt={person.name} className="w-20 h-20 lg:w-24 lg:h-24 rounded-full object-cover mb-4 mt-2 border-4 border-purple-200 bg-purple-100" />
                     {/* Name */}
-                    <div className="text-black font-bold text-sm lg:text-base mb-1 text-center">{person.name}</div>
+                    <div className="text-white font-bold text-sm lg:text-base mb-0 text-center">{person.name}</div>
                     {/* Designation */}
-                    <div className="text-purple-700 text-xs lg:text-sm text-center m-0">{person.designation}</div>
+                    <div className="text-gray-300 font-bold text-xs lg:text-sm text-center m-4">{person.designation}</div>
                     {/* Review Text */}
-                    <div className="text-black text-xs lg:text-sm leading-snug break-words whitespace-normal text-center m-0 -mt-1">{person.review}</div>
+                    <div className="text-white text-xs lg:text-sm leading-snug break-words whitespace-normal text-center m-3 -mt-1">{person.review}</div>
                   </div>
                 </div>
               ))}
