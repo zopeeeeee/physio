@@ -1,4 +1,391 @@
-import { useState } from 'react';
+
+"use client"
+
+import { useEffect, useMemo, useRef, useState } from "react"
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+
+interface CardData {
+  id: string
+  imageSrc: string // Place your celebrity images in /public/images and set e.g. "/images/bhavna.jpg"
+  quote: string
+  author: string
+  company: string
+}
+
+/*
+Where to add celebrity images:
+- Place files in /public/images (e.g., /public/images/bhavna.jpg)
+- Set imageSrc in cards[] to "/images/bhavna.jpg"
+*/
+const cards: CardData[] = [
+  {
+    id: "1",
+    imageSrc: "/placeholder.svg?height=800&width=800",
+    quote:
+      "Flexrite World has been my top choice for years. Whether it's any time, they are my first call.",
+    author: "Bhavna Talwar",
+    company: "Phantom Production",
+  },
+  {
+    id: "2",
+    imageSrc: "/placeholder.svg?height=800&width=800",
+    quote:
+      "Flexrite World offers the fastest pain relief, and I believe the doctors there have a magical touch. I can vouch.",
+    author: "Jaya Bhattacharya",
+    company: "Actor",
+  },
+  {
+    id: "3",
+    imageSrc: "/placeholder.svg?height=800&width=800",
+    quote:
+      "After collaborating with many physiotherapy institutes, I can say Flexrite World offers the best pain relief.",
+    author: "Chandrakant Handore",
+    company: "Member of Parliament",
+  },
+  {
+    id: "4",
+    imageSrc: "/placeholder.svg?height=800&width=800",
+    quote:
+      "Priyanka excels at her work; bring your loved ones to Flexrite. Health is biggest investment.",
+    author: "Anupam Mittal",
+    company: "Investor",
+  },
+  {
+    id: "5",
+    imageSrc: "/placeholder.svg?height=800&width=800",
+    quote:
+      "Experiencing healing at Flexrite World is essential on my agenda, right alongside refreshments and rest.",
+    author: "Abhishek Bachchan",
+    company: "Actor",
+  },
+]
+
+export default function Component() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  })
+
+  // Card sizing (reduced height as requested previously)
+  const cardWidth = 680
+  const cardHeight = 410
+  const stackGap = 96 // visible portion shift in the centered stack
+
+  const numCards = cards.length
+
+  // Timeline in "segments":
+  // - stackSegments: each card enters = numCards segments
+  // - dwellSegments: small pause after complete stack (so 5th settles) before exits start
+  // - leaveSegments: each card exits in reversed order = numCards segments
+  const stackSegments = numCards
+  const dwellSegments = 0.35 // a fraction of one segment for a brief pause
+  const leaveSegments = numCards
+  const totalSegments = stackSegments + dwellSegments + leaveSegments
+  const segmentSize = 1 / totalSegments
+
+  // Anchors for user-friendly navigation:
+  // - end of each entry (stacking phase)
+  // - start of each exit (reversed order), after dwell for the first leaving card
+  const anchors = useMemo(() => {
+    const a: number[] = []
+    // End of entries (card 1..5 stacked)
+    for (let i = 1; i <= numCards; i++) {
+      a.push(i * segmentSize)
+    }
+    // Start of reversed exits (5..1)
+    for (let leaveOrder = 0; leaveOrder < numCards; leaveOrder++) {
+      const startSeg = stackSegments + dwellSegments + leaveOrder
+      a.push(startSeg * segmentSize)
+    }
+    return a
+  }, [numCards, segmentSize])
+
+  // Build breakpoints for segment-local progress: [0, ...anchors, 1]
+  const breakpoints = useMemo(() => [0, ...anchors, 1], [anchors])
+
+  // Total scrollable height (fixes Tailwind arbitrary height bug by using style)
+  const totalHeightVh = totalSegments * 100
+
+  // For reversed stack positioning:
+  const totalStackWidth = cardWidth + (numCards - 1) * stackGap
+
+  // Which anchor are we closest to? Drives arrows and keyboard UX
+  const [activeStep, setActiveStep] = useState(0)
+
+  // For the floating chip: segment-local progress [0..1] and display step number
+  const [segmentProgress, setSegmentProgress] = useState(0)
+  const [chipStep, setChipStep] = useState(1) // 1..anchors.length
+
+  const findClosestAnchorIndex = (t: number) => {
+    let idx = 0
+    let best = Infinity
+    for (let i = 0; i < anchors.length; i++) {
+      const d = Math.abs(t - anchors[i])
+      if (d < best) {
+        best = d
+        idx = i
+      }
+    }
+    return idx
+  }
+
+  useMotionValueEvent(scrollYProgress, "change", (t) => {
+    // 1) Existing: nearest anchor for arrows
+    setActiveStep(findClosestAnchorIndex(t))
+
+    // 2) Segment-local progress between breakpoints
+    let k = 0
+    for (let i = 0; i < breakpoints.length - 1; i++) {
+      if (t >= breakpoints[i] && t <= breakpoints[i + 1]) {
+        k = i
+        break
+      }
+    }
+    const start = breakpoints[k]
+    const end = breakpoints[k + 1]
+    const denom = Math.max(end - start, 0.000001)
+    const local = (t - start) / denom
+    setSegmentProgress(Math.min(1, Math.max(0, local)))
+
+    // 3) Chip step number: map segment index to next anchor index (1..anchors.length)
+    // k==0 (before first anchor) -> 1, k in [1..anchors.length] -> clamp to 1..anchors.length
+    const display = Math.min(anchors.length, Math.max(1, k))
+    setChipStep(display)
+  })
+
+  // Smooth step navigation
+  const scrollToStep = (index: number) => {
+    const clamped = Math.max(0, Math.min(anchors.length - 1, index))
+    const targetProgress = anchors[clamped]
+    const totalPx = totalSegments * window.innerHeight
+    window.scrollTo({ top: targetProgress * totalPx, behavior: "smooth" })
+  }
+
+  // Keyboard navigation: Left/Right + Home/End
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault()
+        scrollToStep(activeStep + 1)
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        scrollToStep(activeStep - 1)
+      } else if (e.key === "Home") {
+        e.preventDefault()
+        scrollToStep(0)
+      } else if (e.key === "End") {
+        e.preventDefault()
+        scrollToStep(anchors.length - 1)
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [activeStep, anchors.length])
+
+  // Ring geometry
+  const R = 9
+  const CIRC = 2 * Math.PI * R
+  const dashOffset = CIRC * (1 - segmentProgress)
+
+  return (
+    <>
+      {/* Top Section: Animated Stack */}
+      <div
+        ref={containerRef}
+        style={{ height: `${totalHeightVh}vh` }}
+        className="bg-white font-sans"
+      >
+        <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+          <div
+            className="relative w-full max-w-[1600px] h-[480px] flex items-center justify-center"
+            style={{ perspective: "1200px" }}
+          >
+            {/* Floating progress chip (decorative, non-interactive) */}
+            <div
+              className="absolute top-4 right-4 z-30 select-none"
+              aria-hidden="true"
+            >
+              <div className="flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 shadow-md border border-black/[0.06]">
+                <svg width="24" height="24" viewBox="0 0 24 24" className="shrink-0">
+                  {/* Track */}
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r={R}
+                    fill="none"
+                    stroke="rgba(0,0,0,0.12)"
+                    strokeWidth="2"
+                  />
+                  {/* Progress */}
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r={R}
+                    fill="none"
+                    stroke="rgb(239,68,68)" // red-500 accent to match pagination
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeDasharray={CIRC}
+                    strokeDashoffset={dashOffset}
+                    transform="rotate(-90 12 12)"
+                  />
+                </svg>
+                <span className="text-xs font-semibold text-gray-800">{`Step ${chipStep}/${anchors.length}`}</span>
+              </div>
+            </div>
+
+            {cards.map((card, index) => {
+              // REVERSED STACK POSITIONS:
+              // After fully stacked, card 1 is right/front, 2 next left, ... 5 left/back.
+              const reversedIndex = numCards - 1 - index
+              const stackedX =
+                -(totalStackWidth / 2) + cardWidth / 2 + reversedIndex * stackGap
+
+              // Entry timings: original order (1..5)
+              const entryStart = index * segmentSize
+              const entryEnd = (index + 1) * segmentSize
+
+              // Exit timings: reversed order (5..1), with a dwell pause before the first exit
+              const leaveOrder = numCards - 1 - index // 0 for the 5th, 1 for the 4th, ...
+              const exitStart = (stackSegments + dwellSegments + leaveOrder) * segmentSize
+              const exitEnd = (stackSegments + dwellSegments + leaveOrder + 1) * segmentSize
+
+              const inputRange = [entryStart, entryEnd, exitStart, exitEnd]
+
+              // Off-screen bounds
+              const offRight = cardWidth * 1.6
+              const offLeft = -cardWidth * 1.6
+
+              // Motion transforms (UNCHANGED card effects)
+              const x = useTransform(scrollYProgress, inputRange, [
+                offRight, // enter from right
+                stackedX, // settle in stack
+                stackedX, // hold (includes dwell at stack completion)
+                offLeft, // leave to left in 5 -> 1 order
+              ])
+              const opacity = useTransform(scrollYProgress, inputRange, [0, 1, 1, 0])
+              const scale = useTransform(scrollYProgress, inputRange, [0.96, 1, 1, 0.96])
+              const rotateY = useTransform(scrollYProgress, inputRange, [3, 0, 0, -3])
+
+              // Layering: ensure card 1 appears on top within the stack
+              const zStatic = numCards - reversedIndex
+
+              return (
+                <motion.div
+                  key={card.id}
+                  className="absolute bg-white rounded-[16px] overflow-hidden"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${cardHeight}px`,
+                    left: "50%",
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: "center",
+                    x,
+                    opacity,
+                    scale,
+                    rotateY,
+                    zIndex: zStatic,
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <div className="flex h-full">
+                    {/* IMAGE LEFT */}
+                    <div className="relative w-1/2 h-full bg-gray-100">
+                      <img
+                        src={card.imageSrc || "/placeholder.svg"}
+                        alt={card.author}
+                        width={900}
+                        height={900}
+                        className="h-full w-full object-cover"
+                        loading={index === 0 ? "eager" : "lazy"}
+                      />
+
+                      {/* Arrows (unchanged) */}
+                      <div className="absolute bottom-4 right-4 flex gap-3">
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.06 }}
+                          whileTap={{ scale: 0.94 }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Move to previous anchor
+                            const prev = Math.max(0, activeStep - 1)
+                            const totalPx = totalSegments * window.innerHeight
+                            window.scrollTo({ top: anchors[prev] * totalPx, behavior: "smooth" })
+                          }}
+                          disabled={activeStep <= 0}
+                          className={`h-12 w-12 rounded-full grid place-items-center shadow-md transition-colors ${
+                            activeStep <= 0
+                              ? "bg-white/70 text-gray-400 cursor-not-allowed"
+                              : "bg-white text-black hover:bg-white"
+                          }`}
+                          aria-label="Previous"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </motion.button>
+
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.06 }}
+                          whileTap={{ scale: 0.94 }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Move to next anchor
+                            const next = Math.min(anchors.length - 1, activeStep + 1)
+                            const totalPx = totalSegments * window.innerHeight
+                            window.scrollTo({ top: anchors[next] * totalPx, behavior: "smooth" })
+                          }}
+                          disabled={activeStep >= anchors.length - 1}
+                          className={`h-12 w-12 rounded-full grid place-items-center shadow-md transition-colors ${
+                            activeStep >= anchors.length - 1
+                              ? "bg-white/70 text-gray-400 cursor-not-allowed"
+                              : "bg-white text-black hover:bg-white"
+                          }`}
+                          aria-label="Next"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* TEXT RIGHT */}
+                    <div className="w-1/2 h-full px-10 py-8 flex flex-col">
+                      {/* Pagination 1/5, 2/5, ... */}
+                      <div className="ml-auto text-sm font-semibold text-red-500">
+                        {`${index + 1}/${numCards}`}
+                      </div>
+
+                      {/* Quote */}
+                      <p className="mt-6 text-[20px] leading-8 text-black font-sans">
+                        {card.quote}
+                      </p>
+
+                      {/* Author block */}
+                      <div className="mt-auto pt-6">
+                        <div className="w-12 h-[2px] bg-gray-300 mb-3" />
+                        <p className="text-lg font-semibold text-black font-serif">
+                          {card.author}
+                        </p>
+                        <p className="text-sm text-gray-600 font-sans">{card.company}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+      {/* Bottom Section: What Clients Are Saying Carousel */}
+      <BottomTestimonials />
+    </>
+  )
+}
+// Bottom Section Carousel Component
+// ...existing code...
 const testimonials = [
   {
     name: 'Amit Sharma',
@@ -32,177 +419,102 @@ const testimonials = [
   },
 ];
 
-export default function Testimonials() {
-  // For hover-to-pause, track hovered row index
+function BottomTestimonials() {
   const [pausedRow, setPausedRow] = useState<number|null>(null);
-  // Helper to duplicate testimonials for seamless loop
   const getLooped = (arr: any[], count: number) => {
     const out = [];
     for (let i = 0; i < count; i++) out.push(...arr);
     return out;
   };
   return (
-    <section className="w-full overflow-x-hidden">
-      {/* Top Section - The Flexrite Experience (White) */}
-      <div className="bg-white w-full">
+    <div className="bg-black w-full">
       <div className="py-16 lg:py-24 px-0 w-full">
-          {/* Section Header */}
-          <div className="text-center mb-8">
-            <h2 className="font-playfair font-bold text-black text-4xl lg:text-7xl mb-4">
-              The Flexrite Experience
-            </h2>
-            <p className="font-playfair font-bold text-black text-lg lg:text-xl tracking-wide">
-              FEEDBACKS THAT INSPIRS US
-            </p>
-          </div>
-          {/* Experience Cards Row - Half White, Half Black */}
-          <div className="relative mt-16" style={{minHeight: '22rem'}}>
-            <div className="flex flex-row justify-center items-center gap-12 lg:gap-10 relative z-20 overflow-x-auto whitespace-nowrap hide-scrollbar">
-              {[
-                {
-                  image: "/BT.avif",
-                  name: "Bhavna Talwar",
-                  designation: "Phantom Production",
-                  review: "Flexrite World has been my top choice for years. Whether it's any time, they are my first call."
-                },
-                {
-                  image: "/JB.avif",
-                  name: "Jaya Bhattacharya",
-                  designation: "Actor",
-                  review: "Flexrite World offers the fastest pain relief, and I believe the doctors there have a magical touch. I can vouch. "
-                },
-                {
-                  image: "/CH.avif",
-                  name: "Chandrakant Handore",
-                  designation: "Member of Parliament",
-                  review: "After collaborating with many physiotherapy institutes, I can say Flexrite World offers the best pain relief."
-                },
-                {
-                  image: "/AM.avif",
-                  name: "Anupam Mittal",
-                  designation: "Investor",
-                  review: "Priyanka excels at her work; bring your loved ones to Flexrite. Health is biggest investment."
-                },
-                {
-                  image: "/AB.avif",
-                  name: "Abhishek Bachchan",
-                  designation: "Actor",
-                  review: "Experiencing healing at Flexrite World is essential on my agenda, right alongside refreshments and rest."
-                }
-              ].map((person, index) => (
-                <div key={index} className="flex flex-col">
-                  <div className="bg-black rounded-3xl p-6 lg:p-6 min-h-[340px] lg:min-h-[400px] w-[180px] lg:w-[220px] flex flex-col items-center">
-                    {/* Profile Image */}
-                    <img src={person.image} alt={person.name} className="w-20 h-20 lg:w-24 lg:h-24 rounded-full object-cover mb-4 mt-2 border-4 border-purple-200 bg-purple-100" />
-                    {/* Name */}
-                    <div className="text-white font-bold text-sm lg:text-base mb-0 text-center">{person.name}</div>
-                    {/* Designation */}
-                    <div className="text-gray-300 font-bold text-xs lg:text-sm text-center m-4">{person.designation}</div>
-                    {/* Review Text */}
-                    <div className="text-white text-xs lg:text-sm leading-snug break-words whitespace-normal text-center m-3 -mt-1">{person.review}</div>
-                  </div>
-                </div>
+        <div className="text-center mb-16">
+          <h2 className="font-playfair font-bold text-white text-4xl lg:text-7xl leading-tight">
+            What Clients Are<br />Saying ?
+          </h2>
+        </div>
+        <div className="space-y-8 w-full px-0">
+          {/* Row 1 - left to right */}
+          <div
+            className="relative w-full overflow-hidden group"
+            onMouseEnter={() => setPausedRow(0)}
+            onMouseLeave={() => setPausedRow(null)}
+          >
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
+            <div
+              className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-smooth`}
+              style={pausedRow === 0 ? { animationPlayState: 'paused' } : {}}
+            >
+              {getLooped(testimonials, 2).map((t, i) => (
+                <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
               ))}
             </div>
           </div>
+          {/* Row 2 - right to left */}
+          <div
+            className="relative w-full overflow-hidden group"
+            onMouseEnter={() => setPausedRow(1)}
+            onMouseLeave={() => setPausedRow(null)}
+          >
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
+            <div
+              className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-reverse-smooth`}
+              style={pausedRow === 1 ? { animationPlayState: 'paused' } : {}}
+            >
+              {getLooped(testimonials, 2).map((t, i) => (
+                <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
+              ))}
+            </div>
+          </div>
+          {/* Row 3 - left to right */}
+          <div
+            className="relative w-full overflow-hidden group"
+            onMouseEnter={() => setPausedRow(2)}
+            onMouseLeave={() => setPausedRow(null)}
+          >
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
+            <div
+              className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-smooth`}
+              style={pausedRow === 2 ? { animationPlayState: 'paused' } : {}}
+            >
+              {getLooped(testimonials, 2).map((t, i) => (
+                <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
+              ))}
+            </div>
+          </div>
+          {/* Marquee CSS */}
+          <style>{`
+            @keyframes marquee-smooth {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            @keyframes marquee-reverse-smooth {
+              0% { transform: translateX(-50%); }
+              100% { transform: translateX(0); }
+            }
+            .animate-marquee-smooth {
+              animation: marquee-smooth 22s linear infinite;
+              animation-play-state: running;
+            }
+            .animate-marquee-reverse-smooth {
+              animation: marquee-reverse-smooth 22s linear infinite;
+              animation-play-state: running;
+            }
+            .hide-scrollbar {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .hide-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
         </div>
       </div>
-
-      {/* Bottom Section - What Clients Are Saying (Black) */}
-      <div className="bg-black w-full">
-        <div className="py-16 lg:py-24 px-0 w-full">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="font-playfair font-bold text-white text-4xl lg:text-7xl leading-tight">
-              What Clients Are<br />Saying ?
-            </h2>
-          </div>
-          {/* Testimonial Cards Carousel - 3 rows, horizontal scroll */}
-          <div className="space-y-8 w-full px-0">
-            {/* Row 1 - left to right */}
-            <div
-              className="relative w-full overflow-hidden group"
-              onMouseEnter={() => setPausedRow(0)}
-              onMouseLeave={() => setPausedRow(null)}
-            >
-              {/* Fade overlays */}
-              <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
-              <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
-              <div
-                className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-smooth`}
-                style={pausedRow === 0 ? { animationPlayState: 'paused' } : {}}
-              >
-                {getLooped(testimonials, 2).map((t, i) => (
-                  <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
-                ))}
-              </div>
-            </div>
-            {/* Row 2 - right to left */}
-            <div
-              className="relative w-full overflow-hidden group"
-              onMouseEnter={() => setPausedRow(1)}
-              onMouseLeave={() => setPausedRow(null)}
-            >
-              {/* Fade overlays */}
-              <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
-              <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
-              <div
-                className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-reverse-smooth`}
-                style={pausedRow === 1 ? { animationPlayState: 'paused' } : {}}
-              >
-                {getLooped(testimonials, 2).map((t, i) => (
-                  <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
-                ))}
-              </div>
-            </div>
-            {/* Row 3 - left to right */}
-            <div
-              className="relative w-full overflow-hidden group"
-              onMouseEnter={() => setPausedRow(2)}
-              onMouseLeave={() => setPausedRow(null)}
-            >
-              {/* Fade overlays */}
-              <div className="pointer-events-none absolute left-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to right, #000 60%, transparent 100%)'}}></div>
-              <div className="pointer-events-none absolute right-0 top-0 h-full w-16 z-30" style={{background: 'linear-gradient(to left, #000 60%, transparent 100%)'}}></div>
-              <div
-                className={`flex gap-6 whitespace-nowrap hide-scrollbar animate-marquee-smooth`}
-                style={pausedRow === 2 ? { animationPlayState: 'paused' } : {}}
-              >
-                {getLooped(testimonials, 2).map((t, i) => (
-                  <TestimonialCard key={i} showProfile={true} className="inline-block" testimonial={t} />
-                ))}
-              </div>
-            </div>
-            {/* Marquee CSS */}
-            <style>{`
-              @keyframes marquee-smooth {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-50%); }
-              }
-              @keyframes marquee-reverse-smooth {
-                0% { transform: translateX(-50%); }
-                100% { transform: translateX(0); }
-              }
-              .animate-marquee-smooth {
-                animation: marquee-smooth 22s linear infinite;
-                animation-play-state: running;
-              }
-              .animate-marquee-reverse-smooth {
-                animation: marquee-reverse-smooth 22s linear infinite;
-                animation-play-state: running;
-              }
-              .hide-scrollbar {
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-              }
-              .hide-scrollbar::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }
 

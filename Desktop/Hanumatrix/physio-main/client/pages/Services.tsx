@@ -1,6 +1,10 @@
 import Header from "@/components/Header";
+import ContactFooter from "@/components/ContactFooter";
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 interface Service {
   id: string;
@@ -103,8 +107,40 @@ export default function Services() {
       observer.observe(ref);
       observers.push(observer);
     });
+    // GSAP Parallax integration
+    blockRefs.current.forEach((ref, idx) => {
+      if (!ref) return;
+      const bg = ref.querySelector('.service-bg');
+      const img = ref.querySelector('.service-img');
+      if (bg) {
+        gsap.to(bg, {
+          y: -40,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ref,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
+      if (img) {
+        gsap.to(img, {
+          y: -20,
+          scale: 1.08,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ref,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
+    });
     return () => {
       observers.forEach((observer) => observer.disconnect());
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
@@ -122,10 +158,13 @@ export default function Services() {
           transform: translateX(0);
         }
         .slide-from-right {
-          transform: translateX(60px);
+          transform: translateX(180px); /* Increased distance */
         }
         .slide-from-left {
-          transform: translateX(-60px);
+          transform: translateX(-180px); /* Increased distance */
+        }
+        button.pressed {
+          transform: scale(0.93);
         }
       `}</style>
       <div className="min-h-screen bg-white py-16 pt-24">
@@ -145,7 +184,7 @@ export default function Services() {
         </motion.div>
 
         {/* Services Grid */}
-        <div className="container mx-auto px-4 space-y-16 md:space-y-20">
+        <div className="container mx-auto px-4 space-y-10 md:space-y-14">
           {services.map((service, idx) => {
             const direction = animationDirections[idx] === "right" ? "slide-from-right" : "slide-from-left";
             return (
@@ -158,35 +197,42 @@ export default function Services() {
                 {service.layout === 'left' ? (
                   /* Left Layout - Circle on left, content on right */
                   <div className="relative">
-                    <div className="w-full h-80 md:h-96 lg:h-[410px] rounded-[150px] bg-gradient-to-r from-purple-200/60 to-transparent"></div>
+                    <div className="service-bg w-full h-48 md:h-56 lg:h-64 rounded-[80px] bg-gradient-to-r from-purple-200/60 to-transparent"></div>
                     <div className="absolute inset-0 flex flex-col md:flex-row items-center">
                       {/* Circle with image */}
-                      <div className="w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full bg-black flex-shrink-0 mb-8 md:mb-0 md:ml-8 lg:ml-12 overflow-hidden flex items-center justify-center">
+                      <div className="service-img w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full bg-black flex-shrink-0 mb-4 md:mb-0 md:ml-4 lg:ml-8 overflow-hidden flex items-center justify-center">
                         <img
                           src={service.image}
                           alt={service.title}
                           className="object-cover w-full h-full"
                         />
-                        {/* TODO: Replace src with actual image path for {service.title} */}
                       </div>
                       {/* Content */}
-                      <div className="flex-1 px-4 md:px-8 lg:px-12 text-center md:text-left">
-                        <h2 className="font-playfair font-bold text-3xl md:text-4xl lg:text-5xl text-black mb-6">
+                      <div className="flex-1 px-2 md:px-4 lg:px-6 text-center md:text-left">
+                        <h2 className="font-playfair font-bold text-xl md:text-2xl lg:text-3xl text-black mb-3">
                           {service.title}
                         </h2>
-                        <p className="font-source text-lg md:text-xl lg:text-2xl xl:text-3xl text-black mb-8 leading-relaxed">
+                        <p className="font-source text-sm md:text-base lg:text-lg xl:text-xl text-black mb-4 leading-relaxed">
                           {service.description}
                         </p>
                         {/* Duration and Button Row */}
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                          <button className="px-8 py-3 bg-black text-white font-source text-lg md:text-xl rounded-xl hover:bg-gray-800 transition-colors">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                          <button
+                            className="px-4 py-2 bg-black text-white font-source text-base md:text-lg rounded-lg hover:bg-gray-800 transition-colors active:scale-95 focus:ring-2 focus:ring-purple-300 focus:outline-none"
+                            onClick={e => {
+                              const btn = e.currentTarget;
+                              btn.classList.add('pressed');
+                              setTimeout(() => btn.classList.remove('pressed'), 180);
+                            }}
+                            style={{ transition: 'transform 0.15s cubic-bezier(.4,2,.3,1)' }}
+                          >
                             Book Session
                           </button>
                           <div className="text-right">
-                            <p className="font-source text-lg md:text-xl text-black">
+                            <p className="font-source text-base md:text-lg text-black">
                               {service.duration}
                             </p>
-                            <p className="font-source text-lg md:text-xl text-black">
+                            <p className="font-source text-base md:text-lg text-black">
                               Based on Experts
                             </p>
                           </div>
@@ -197,39 +243,46 @@ export default function Services() {
                 ) : (
                   /* Right Layout - Content on left, circle on right */
                   <div className="relative">
-                    <div className="w-full h-80 md:h-96 lg:h-[410px] rounded-[150px] bg-gradient-to-l from-purple-200/60 to-transparent"></div>
+                    <div className="service-bg w-full h-48 md:h-56 lg:h-64 rounded-[80px] bg-gradient-to-l from-purple-200/60 to-transparent"></div>
                     <div className="absolute inset-0 flex flex-col md:flex-row items-center">
                       {/* Content */}
-                      <div className="flex-1 px-4 md:px-8 lg:px-12 text-center md:text-left order-2 md:order-1">
-                        <h2 className="font-playfair font-bold text-3xl md:text-4xl lg:text-5xl text-black mb-6">
+                      <div className="flex-1 px-2 md:px-4 lg:px-6 text-center md:text-left order-2 md:order-1">
+                        <h2 className="font-playfair font-bold text-xl md:text-2xl lg:text-3xl text-black mb-3">
                           {service.title}
                         </h2>
-                        <p className="font-source text-lg md:text-xl lg:text-2xl xl:text-3xl text-black mb-8 leading-relaxed">
+                        <p className="font-source text-sm md:text-base lg:text-lg xl:text-xl text-black mb-4 leading-relaxed">
                           {service.description}
                         </p>
                         {/* Duration and Button Row */}
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                          <button className="px-8 py-3 bg-black text-white font-source text-lg md:text-xl rounded-xl hover:bg-gray-800 transition-colors">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                          <button
+                            className="px-4 py-2 bg-black text-white font-source text-base md:text-lg rounded-lg hover:bg-gray-800 transition-colors active:scale-95 focus:ring-2 focus:ring-purple-300 focus:outline-none"
+                            onClick={e => {
+                              const btn = e.currentTarget;
+                              btn.classList.add('pressed');
+                              setTimeout(() => btn.classList.remove('pressed'), 180);
+                            }}
+                            style={{ transition: 'transform 0.15s cubic-bezier(.4,2,.3,1)' }}
+                          >
                             Book Session
                           </button>
                           <div className="text-right">
-                            <p className="font-source text-lg md:text-xl text-black">
+                            <p className="font-source text-base md:text-lg text-black">
                               {service.duration}
                             </p>
-                            <p className="font-source text-lg md:text-xl text-black">
+                            <p className="font-source text-base md:text-lg text-black">
                               Based on Experts
                             </p>
                           </div>
                         </div>
                       </div>
                       {/* Circle with image */}
-                      <div className="w-64 h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full bg-black flex-shrink-0 mb-8 md:mb-0 md:mr-8 lg:mr-12 order-1 md:order-2 overflow-hidden flex items-center justify-center">
+                      <div className="service-img w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full bg-black flex-shrink-0 mb-4 md:mb-0 md:mr-4 lg:mr-8 order-1 md:order-2 overflow-hidden flex items-center justify-center">
                         <img
                           src={service.image}
                           alt={service.title}
                           className="object-cover w-full h-full"
                         />
-                        {/* TODO: Replace src with actual image path for {service.title} */}
                       </div>
                     </div>
                   </div>
@@ -239,6 +292,7 @@ export default function Services() {
           })}
         </div>
       </div>
+      <ContactFooter />
     </>
   );
 }

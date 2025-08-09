@@ -52,28 +52,28 @@ export default function AboutUs() {
       ref={sectionRef}
       className="relative min-h-[1800px] py-48 px-6 lg:px-20 flex items-center justify-center overflow-hidden"
     >
-      {/* Background image container */}
+      {/* Top video background container */}
       <div
         ref={bgRef}
         className="absolute inset-0 w-full h-full z-0"
-        style={{ background: 'black' }}
+        style={{ background: 'white' }}
       >
         <img
           src="/about.avif"
           alt="About Us Background"
           style={{
             width: '100%',
-            height: '100%',
+            height: '70%',
             objectFit: 'cover',
             position: 'absolute',
-            inset: 0,
+            top: 0,
+            left: 0,
             zIndex: 0,
           }}
         />
       </div>
 
-      {/* Foreground content in a 3-column centered layout */}
-      <div className="relative z-10 w-full grid grid-cols-3">
+      {/* Foreground content in a 3-column centered layout, with black background below video */}
         {/* Left empty column */}
         <div></div>
 
@@ -89,10 +89,10 @@ export default function AboutUs() {
             </span>
           </div>
           <h2 className="font-bold text-3xl lg:text-4xl leading-tight mb-4">
-            Your health is our mission—helping you move better, recover faster,
+            Your health is our mission. Helping you move better, recover faster,
             and enjoy a vibrant lifestyle.
           </h2>
-          <h3 className="text-purple-200 font-bold text-2xl lg:text-3xl mb-4">
+          <h3 className="text-#41f147ff font-bold text-2xl lg:text-3xl mb-4">
             Stronger, Healthier, Happier
           </h3>
           <p className="text-lg leading-relaxed mb-8">
@@ -122,40 +122,11 @@ export default function AboutUs() {
               <p className="text-sm">Worldwide Honors</p>
             </div>
           </div>
-
-          <div className="flex items-center gap-6 justify-center">
-            <div className="flex -space-x-4">
-              <img
-                src="/das.jpg"
-                className="w-14 h-14 rounded-full border-2 border-white"
-              />
-              <img
-                src="/Gupta.avif"
-                className="w-14 h-14 rounded-full border-2 border-white"
-              />
-              <img
-                src="/Nandi.avif"
-                className="w-14 h-14 rounded-full border-2 border-white"
-              />
-            </div>
-            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80">
-              <div className="w-14 h-14 bg-black border border-purple-200 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 19V5l11 7-11 7z" />
-                </svg>
-              </div>
-              <span className="text-sm font-bold">WATCH INTRO</span>
-            </div>
-          </div>
         </div>
 
         {/* Right empty column */}
         <div></div>
-      </div>
+      
     </section>
   );
 }

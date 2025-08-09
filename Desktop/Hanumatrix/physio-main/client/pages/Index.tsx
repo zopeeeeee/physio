@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import AboutUs from "@/components/AboutUs";
+// import AboutUs from "@/components/AboutUs";
 import MeetOurDoctors from "@/components/MeetOurDoctors";
 import BlogsAndNews from "@/components/BlogsAndNews";
 import Testimonials from "@/components/Testimonials";
@@ -13,7 +13,6 @@ export default function Index() {
     <>
       <Header />
       <Hero />
-      <AboutUs />
       <MeetOurDoctors />
       <BlogsAndNews />
       <Testimonials />
