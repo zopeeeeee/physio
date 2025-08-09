@@ -50,7 +50,7 @@ export default function AboutUs() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[1800px] py-48 px-6 lg:px-20 flex items-center justify-center overflow-hidden"
+      className="relative min-h-[1500px] py-48 px-6 lg:px-20 flex items-center justify-center overflow-hidden"
     >
       {/* Top video background container */}
       <div

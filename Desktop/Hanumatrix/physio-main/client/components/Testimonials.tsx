@@ -79,29 +79,23 @@ export default function Component() {
   // Timeline in "segments":
   // - stackSegments: each card enters = numCards segments
   // - dwellSegments: small pause after complete stack (so 5th settles) before exits start
-  // - leaveSegments: each card exits in reversed order = numCards segments
+  // - exitSegments: all cards leave together = 1 segment
   const stackSegments = numCards
-  const dwellSegments = 0.35 // a fraction of one segment for a brief pause
-  const leaveSegments = numCards
-  const totalSegments = stackSegments + dwellSegments + leaveSegments
+  const dwellSegments = 1 // 1 segment for a clear pause
+  const exitSegments = 1 // all cards leave together
+  const totalSegments = stackSegments + dwellSegments + exitSegments
   const segmentSize = 1 / totalSegments
 
   // Anchors for user-friendly navigation:
-  // - end of each entry (stacking phase)
-  // - start of each exit (reversed order), after dwell for the first leaving card
+  // Only keep stacking and exit anchors
   const anchors = useMemo(() => {
     const a: number[] = []
-    // End of entries (card 1..5 stacked)
-    for (let i = 1; i <= numCards; i++) {
-      a.push(i * segmentSize)
-    }
-    // Start of reversed exits (5..1)
-    for (let leaveOrder = 0; leaveOrder < numCards; leaveOrder++) {
-      const startSeg = stackSegments + dwellSegments + leaveOrder
-      a.push(startSeg * segmentSize)
-    }
+    // End of stacking (all cards stacked)
+    a.push(stackSegments * segmentSize)
+    // Start of exit (all cards leave together)
+    a.push((stackSegments + dwellSegments) * segmentSize)
     return a
-  }, [numCards, segmentSize])
+  }, [stackSegments, dwellSegments, segmentSize])
 
   // Build breakpoints for segment-local progress: [0, ...anchors, 1]
   const breakpoints = useMemo(() => [0, ...anchors, 1], [anchors])
@@ -245,33 +239,32 @@ export default function Component() {
                 -(totalStackWidth / 2) + cardWidth / 2 + reversedIndex * stackGap
 
               // Entry timings: original order (1..5)
-              const entryStart = index * segmentSize
-              const entryEnd = (index + 1) * segmentSize
+              const entryStart = index * segmentSize;
+              const entryEnd = (index + 1) * segmentSize;
 
-              // Exit timings: reversed order (5..1), with a dwell pause before the first exit
-              const leaveOrder = numCards - 1 - index // 0 for the 5th, 1 for the 4th, ...
-              const exitStart = (stackSegments + dwellSegments + leaveOrder) * segmentSize
-              const exitEnd = (stackSegments + dwellSegments + leaveOrder + 1) * segmentSize
+              // Exit timings: all cards slide out together after dwell
+              const exitStart = (stackSegments + dwellSegments) * segmentSize;
+              const exitEnd = (stackSegments + dwellSegments + 1) * segmentSize;
 
-              const inputRange = [entryStart, entryEnd, exitStart, exitEnd]
+              const inputRange = [entryStart, entryEnd, exitStart, exitEnd];
 
               // Off-screen bounds
-              const offRight = cardWidth * 1.6
-              const offLeft = -cardWidth * 1.6
+              const offRight = cardWidth * 1.6;
+              const offLeft = -cardWidth * 1.6;
 
-              // Motion transforms (UNCHANGED card effects)
+              // Motion transforms (all cards leave together)
               const x = useTransform(scrollYProgress, inputRange, [
                 offRight, // enter from right
                 stackedX, // settle in stack
                 stackedX, // hold (includes dwell at stack completion)
-                offLeft, // leave to left in 5 -> 1 order
-              ])
-              const opacity = useTransform(scrollYProgress, inputRange, [0, 1, 1, 0])
-              const scale = useTransform(scrollYProgress, inputRange, [0.96, 1, 1, 0.96])
-              const rotateY = useTransform(scrollYProgress, inputRange, [3, 0, 0, -3])
+                offLeft, // all leave together
+              ]);
+              const opacity = useTransform(scrollYProgress, inputRange, [0, 1, 1, 0]);
+              const scale = useTransform(scrollYProgress, inputRange, [0.96, 1, 1, 0.96]);
+              const rotateY = useTransform(scrollYProgress, inputRange, [3, 0, 0, -3]);
 
               // Layering: ensure card 1 appears on top within the stack
-              const zStatic = numCards - reversedIndex
+              const zStatic = numCards - reversedIndex;
 
               return (
                 <motion.div
@@ -310,11 +303,11 @@ export default function Component() {
                           whileHover={{ scale: 1.06 }}
                           whileTap={{ scale: 0.94 }}
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             // Move to previous anchor
-                            const prev = Math.max(0, activeStep - 1)
-                            const totalPx = totalSegments * window.innerHeight
-                            window.scrollTo({ top: anchors[prev] * totalPx, behavior: "smooth" })
+                            const prev = Math.max(0, activeStep - 1);
+                            const totalPx = totalSegments * window.innerHeight;
+                            window.scrollTo({ top: anchors[prev] * totalPx, behavior: "smooth" });
                           }}
                           disabled={activeStep <= 0}
                           className={`h-12 w-12 rounded-full grid place-items-center shadow-md transition-colors ${
@@ -332,11 +325,11 @@ export default function Component() {
                           whileHover={{ scale: 1.06 }}
                           whileTap={{ scale: 0.94 }}
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             // Move to next anchor
-                            const next = Math.min(anchors.length - 1, activeStep + 1)
-                            const totalPx = totalSegments * window.innerHeight
-                            window.scrollTo({ top: anchors[next] * totalPx, behavior: "smooth" })
+                            const next = Math.min(anchors.length - 1, activeStep + 1);
+                            const totalPx = totalSegments * window.innerHeight;
+                            window.scrollTo({ top: anchors[next] * totalPx, behavior: "smooth" });
                           }}
                           disabled={activeStep >= anchors.length - 1}
                           className={`h-12 w-12 rounded-full grid place-items-center shadow-md transition-colors ${
@@ -374,7 +367,7 @@ export default function Component() {
                     </div>
                   </div>
                 </motion.div>
-              )
+              );
             })}
           </div>
         </div>

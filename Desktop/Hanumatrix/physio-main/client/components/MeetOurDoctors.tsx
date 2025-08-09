@@ -52,7 +52,7 @@ function DoctorCard({ doctor }) {
           </g>
           <defs>
             <clipPath id="clip0_273_8">
-              <rect width="24" height="24" fill="white" transform="translate(0.980347 0.390015)" />
+              <rect width="24" height="24" fill="black" transform="translate(0.980347 0.390015)" />
             </clipPath>
           </defs>
         </svg>
@@ -93,7 +93,7 @@ export default function MeetOurDoctors() {
         .doctor-card {
           width: 320px; /* Increased width */
           height: 450px; /* Increased height */
-          background: white;
+          background: black;
           border-radius: 32px;
           padding: 3px;
           position: relative;
@@ -112,7 +112,7 @@ export default function MeetOurDoctors() {
         }
 
         .doctor-card .mail-button svg {
-          stroke: #000000ff;
+          stroke: #ffffff;
           stroke-width: 3px;
           transition: stroke 0.3s ease-in-out;
         }
@@ -179,7 +179,7 @@ export default function MeetOurDoctors() {
         .doctor-card .bottom-section .content .doctor-name {
           display: block;
           font-size: 1.4rem; /* Adjusted for larger card */
-          color: black;
+          color: white;
           font-weight: bold;
           font-family: 'Playfair Display', serif;
           margin-bottom: 0.5rem; /* Add some space between name and specialty */
@@ -188,7 +188,7 @@ export default function MeetOurDoctors() {
         .doctor-card .bottom-section .content .doctor-specialty {
           display: block;
           font-size: 1.0rem; /* Adjusted for larger card */
-          color: white;
+          color: black;
           /* margin-top: 0.5rem; Removed as flexbox handles spacing */
           font-family: 'Source Sans Pro', sans-serif;
         }
@@ -224,14 +224,14 @@ export default function MeetOurDoctors() {
         }
       `}</style>
 
-      <section className="bg-black py-16 lg:py-24 px-4 lg:px-16">
+  <section className="bg-white py-16 lg:py-24 px-4 lg:px-16">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <h2 className="font-playfair font-bold text-white text-4xl lg:text-7xl mb-4">
+            <h2 className="font-playfair font-bold text-black text-4xl lg:text-7xl mb-4">
               Meet Our Doctors
             </h2>
-            <p className="font-source text-white text-lg lg:text-xl">
+            <p className="font-source text-black text-lg lg:text-xl">
               Compassionate experts dedicated to your recovery and well-being.
             </p>
           </div>
