@@ -1,4 +1,11 @@
+import ContactFormModal from "./ContactFormModal";
+import { useState } from "react";
+
 export default function ContactFooter() {
+  const [showContactForm, setShowContactForm] = useState(false);
+
+  
+    const [showFeedback, setShowFeedback] = useState(false);
   return (
     <footer className="bg-black text-white py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -13,8 +20,49 @@ export default function ContactFooter() {
             <div className="flex items-center bg-[#E6D6FB] rounded-xl px-2 py-2 w-full max-w-md">
               <button className="flex-1 px-6 py-3 text-black font-bold bg-transparent hover:bg-[#d1bff2] rounded-xl transition-colors text-lg">Give Feedback</button>
               <div className="mx-2"></div>
-              <button className="flex-1 px-6 py-3 text-coral font-bold bg-black hover:bg-gray-900 rounded-xl transition-colors text-lg">Submit</button>
+              <button
+                className="flex-1 px-6 py-3 text-coral font-bold bg-black hover:bg-gray-900 rounded-xl transition-colors text-lg"
+                onClick={() => setShowContactForm(true)}
+              >
+                Submit
+              </button>
+      {showContactForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full relative">
+            <button
+              className="absolute top-4 right-4 text-black text-2xl font-bold hover:text-gray-600"
+              onClick={() => setShowContactForm(false)}
+              aria-label="Close contact form"
+            >
+              &times;
+            </button>
+            <ContactFormModal />
+          </div>
+        </div>
+      )}
             </div>
+              <div className="flex justify-center mt-8">
+                <button
+                  className="px-6 py-3 bg-submit-purple text-black font-bold rounded-[33px] shadow-md hover:bg-opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-submit-purple focus:ring-offset-2 focus:ring-offset-black active:scale-[0.98]"
+                  onClick={() => setShowFeedback(true)}
+                >
+                  Submit Feedback
+                </button>
+              </div>
+              {showFeedback && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                  <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full relative">
+                    <button
+                      className="absolute top-4 right-4 text-black text-2xl font-bold hover:text-gray-600"
+                      onClick={() => setShowFeedback(false)}
+                      aria-label="Close feedback form"
+                    >
+                      &times;
+                    </button>
+                    <ContactFormModal />
+                  </div>
+                </div>
+              )}
           </div>
           {/* Map Section */}
           <div className="w-full flex justify-center mb-12">

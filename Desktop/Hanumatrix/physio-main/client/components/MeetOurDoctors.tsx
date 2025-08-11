@@ -11,13 +11,13 @@ const doctorsData = [
   {
     id: 2,
     name: "Dr. Dhiraj Gupta",
-    image: "/Gupta.avif",
+    image: "/Gupta.jpg",
     // Removed twitter: "https://twitter.com/johnsmith",
   },
   {
     id: 3,
     name: "Dr. Asimayan Nandi",
-    image: "/Nandi.avif",
+    image: "/Nandi.jpg",
     // Removed twitter: "https://twitter.com/emilywhite",
   },
 ];
@@ -87,144 +87,29 @@ function DoctorCard({ doctor }) {
 
 export default function MeetOurDoctors() {
   return (
-    <>
-      {/* Embedded CSS for the DoctorCard component */}
+    <div className="meet-our-doctors-overlap" style={{ position: 'relative', zIndex: 10 }}>
       <style>{`
-        .doctor-card {
-          width: 320px; /* Increased width */
-          height: 450px; /* Increased height */
-          background: black;
-          border-radius: 32px;
-          padding: 3px;
-          position: relative;
-          box-shadow: #604b4a30 0px 70px 30px -50px;
-          transition: all 0.5s ease-in-out;
-        }
-
-        .doctor-card .mail-button {
-          position: absolute;
-          right: 2rem;
-          top: 1.4rem;
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          z-index: 4; /* Ensure it's above other elements during hover */
-        }
-
-        .doctor-card .mail-button svg {
-          stroke: #ffffff;
-          stroke-width: 3px;
-          transition: stroke 0.3s ease-in-out;
-        }
-
-        .doctor-card .mail-button svg:hover {
-          stroke: #f55d56;
-        }
-
-        .doctor-card .profile-pic-container {
-          position: absolute;
-          width: calc(100% - 6px);
-          height: calc(100% - 6px);
-          top: 3px;
-          left: 3px;
-          border-radius: 29px;
-          z-index: 1;
-          border: 0px solid #ddd6ff; /* Corresponds to purple-200 */
-          overflow: hidden;
-          transition: all 0.5s ease-in-out 0.2s, z-index 0.5s ease-in-out 0.2s;
-        }
-
-        .doctor-card .profile-pic-container img {
-          object-fit: cover;
-          width: 100%;
-          height: 100%;
-          object-position: 0px 0px; /* Default: top-left */
-          transition: all 0.5s ease-in-out 0s;
-        }
-
-        /* MODIFIED: Removed image zoom on hover */
-        .doctor-card:hover .profile-pic-container img {
-          /* Removed: transform: scale(2.5); */
-          /* Removed: object-position: center; */
-          transition: all 0.5s ease-in-out 0.5s;
-        }
-
-        .doctor-card .bottom-section {
-          position: absolute;
-          bottom: 3px;
-          left: 3px;
-          right: 3px;
-          background: #ddd6ff; /* Corresponds to purple-200 */
-          top: 80%;
-          border-radius: 29px;
-          z-index: 2;
-          box-shadow: rgba(96, 75, 74, 0.188) 0px 5px 5px 0px inset;
-          overflow: hidden;
-          transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0s;
-        }
-
-        .doctor-card .bottom-section .content {
-          position: absolute;
-          bottom: 0;
-          left: 1.5rem;
-          right: 1.5rem;
-          height: 100%; /* Make content take full height of bottom section */
-          padding-top: 1rem; /* Space from the top when expanded */
-          display: flex; /* Use flexbox for vertical centering */
-          flex-direction: column;
-          justify-content: center; /* Center vertically */
-          align-items: flex-start; /* Align text to the left */
-        }
-
-        .doctor-card .bottom-section .content .doctor-name {
-          display: block;
-          font-size: 1.4rem; /* Adjusted for larger card */
-          color: white;
-          font-weight: bold;
-          font-family: 'Playfair Display', serif;
-          margin-bottom: 0.5rem; /* Add some space between name and specialty */
-        }
-
-        .doctor-card .bottom-section .content .doctor-specialty {
-          display: block;
-          font-size: 1.0rem; /* Adjusted for larger card */
-          color: black;
-          /* margin-top: 0.5rem; Removed as flexbox handles spacing */
-          font-family: 'Source Sans Pro', sans-serif;
-        }
-
-        /* Removed .doctor-card .bottom-bottom and its children */
-
-        .doctor-card:hover {
-          border-top-left-radius: 55px;
-        }
-
-        .doctor-card:hover .bottom-section {
-          top: 25%; /* Adjusted for larger card */
-          border-radius: 80px 29px 29px 29px;
-          transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s;
-        }
-
-        .doctor-card:hover .profile-pic-container {
-          width: 110px; /* Adjusted for larger card */
-          height: 110px; /* Adjusted for larger card */
-          aspect-ratio: 1;
-          top: 15px; /* Adjusted for larger card */
-          left: 15px; /* Adjusted for larger card */
-          border-radius: 50%; /* This is key for the circular shape */
-          z-index: 3;
-          border: 7px solid #ddd6ff;
-          box-shadow: rgba(96, 75, 74, 0.188) 0px 5px 5px 0px;
-          transition: all 0.5s ease-in-out, z-index 0.5s ease-in-out 0.1s;
-        }
-
-        .doctor-card:hover .profile-pic-container:hover {
-          transform: scale(1.3); /* This will scale the circular container slightly */
-          border-radius: 0px; /* This will make the circle square on hover */
-        }
+        .doctor-card {width:320px;height:450px;background:black;border-radius:32px;padding:3px;position:relative;box-shadow:#604b4a30 0px 70px 30px -50px;transition:all 0.5s ease-in-out;}
+        .doctor-card .mail-button {position:absolute;right:2rem;top:1.4rem;background:transparent;border:none;cursor:pointer;z-index:4;}
+        .doctor-card .mail-button svg {stroke:#ffffff;stroke-width:3px;transition:stroke 0.3s ease-in-out;}
+        .doctor-card .mail-button svg:hover {stroke:#f55d56;}
+        .doctor-card .profile-pic-container {position:absolute;width:calc(100% - 6px);height:calc(100% - 6px);top:3px;left:3px;border-radius:29px;z-index:1;border:0px solid #ddd6ff;overflow:hidden;transition:all 0.5s ease-in-out 0.2s,z-index 0.5s ease-in-out 0.2s;}
+        .doctor-card .profile-pic-container img {object-fit:cover;width:100%;height:100%;object-position:0px 0px;transition:all 0.5s ease-in-out 0s;}
+        .doctor-card:hover .profile-pic-container img {transition:all 0.5s ease-in-out 0.5s;}
+        .doctor-card .bottom-section {position:absolute;bottom:3px;left:3px;right:3px;background:#ddd6ff;top:80%;border-radius:29px;z-index:2;box-shadow:rgba(96,75,74,0.188) 0px 5px 5px 0px inset;overflow:hidden;transition:all 0.5s cubic-bezier(0.645,0.045,0.355,1) 0s;}
+        .doctor-card .bottom-section .content {position:absolute;bottom:0;left:1.5rem;right:1.5rem;height:100%;padding-top:1rem;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;}
+        .doctor-card .bottom-section .content .doctor-name {display:block;font-size:1.4rem;color:white;font-weight:bold;font-family:'Playfair Display',serif;margin-bottom:0.5rem;}
+        .doctor-card .bottom-section .content .doctor-specialty {display:block;font-size:1.0rem;color:black;font-family:'Source Sans Pro',sans-serif;}
+        .doctor-card:hover {border-top-left-radius:55px;}
+        .doctor-card:hover .bottom-section {top:25%;border-radius:80px 29px 29px 29px;transition:all 0.5s cubic-bezier(0.645,0.045,0.355,1) 0.2s;}
+        .doctor-card:hover .profile-pic-container {width:110px;height:110px;aspect-ratio:1;top:15px;left:15px;border-radius:50%;z-index:3;border:7px solid #ddd6ff;box-shadow:rgba(96,75,74,0.188) 0px 5px 5px 0px;transition:all 0.5s ease-in-out,z-index 0.5s ease-in-out 0.1s;}
+        .doctor-card:hover .profile-pic-container:hover {transform:scale(1.3);border-radius:0px;}
+        .meet-our-doctors-overlap {position:relative;z-index:10;}
+        .meet-our-doctors-sticky {position:sticky;top:0;z-index:10;background:white;box-shadow:0 2px 24px 0 rgba(0,0,0,0.04);}
+        .next-section-parallax {position:relative;z-index:9;margin-top:-120px;padding-top:120px;}
+        @media (max-width:1024px){.meet-our-doctors-sticky{top:0;}.next-section-parallax{margin-top:-60px;padding-top:60px;}}
       `}</style>
-
-  <section className="bg-white py-16 lg:py-24 px-4 lg:px-16">
+      <section className="bg-white py-16 lg:py-24 px-4 lg:px-16 meet-our-doctors-sticky">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-16">
@@ -235,18 +120,18 @@ export default function MeetOurDoctors() {
               Compassionate experts dedicated to your recovery and well-being.
             </p>
           </div>
-
           {/* Doctor Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6 justify-center">
             {doctorsData.map((doctor) => (
-              <DoctorCard
-                key={doctor.id}
-                doctor={doctor}
-              />
+              <DoctorCard key={doctor.id} doctor={doctor} />
             ))}
           </div>
         </div>
       </section>
-    </>
+      {/* Parallax Overlap: Next section visually overlaps as you scroll */}
+      <div className="next-section-parallax">
+        {/* ...existing code for the next section goes here... */}
+      </div>
+    </div>
   );
 }

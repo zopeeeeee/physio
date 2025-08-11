@@ -1,7 +1,20 @@
+// ContactButton component for mailto links
+function ContactButton({ recipient, subject, body, children, className }: { recipient: string, subject: string, body: string, children: React.ReactNode, className?: string }) {
+  return (
+    <button
+      onClick={() => {
+        window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      }}
+      className={className}
+    >
+      {children}
+    </button>
+  );
+}
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ContactFooter from "@/components/ContactFooter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 type JobCategory = 'all' | 'receptionist' | 'professionals' | 'creative' | 'sound' | 'physiotherapy' | 'massage';
 
@@ -115,6 +128,31 @@ export default function Careers() {
     </svg>
   );
 
+  // Animation variants for container and items
+  const container = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 50,
+        damping: 10,
+        mass: 0.75
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -197,11 +235,25 @@ export default function Careers() {
 
           {/* Job listings */}
           <div className="container mx-auto px-4">
-            <div className="space-y-0">
-              {filteredJobs.map((job, index) => (
-                <div key={job.id}>
-                  {/* Job item */}
-                  <div className="flex flex-col md:flex-row md:items-start justify-between py-8 md:py-12">
+            <motion.div 
+              className="space-y-0"
+              variants={container}
+              initial="hidden"
+              animate="visible"
+            >
+              <AnimatePresence>
+                {filteredJobs.map((job, index) => (
+                  <motion.div 
+                    key={job.id}
+                    variants={item}
+                    custom={index}
+                    layout
+                  >
+                    {/* Job item */}
+                    <motion.div 
+                      className="flex flex-col md:flex-row md:items-start justify-between py-8 md:py-12"
+                      whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+                    >
                     <div className="flex-1 pr-8">
                       <h2 className="font-source font-semibold text-3xl md:text-4xl text-black mb-6 transition-all duration-200 cursor-pointer relative group">
                         <span className="group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4 transition-all duration-200">
@@ -218,19 +270,30 @@ export default function Careers() {
                     </div>
                     {/* Apply button */}
                     <div className="flex items-center gap-4 mt-6 md:mt-0 md:ml-8">
-                      <button className="font-source font-semibold text-3xl md:text-4xl text-black hover:text-gray-700 transition-all duration-200 relative group focus:outline-none focus:ring-2 focus:ring-black">
+                      <ContactButton
+                        recipient="careers@flexrite.com"
+                        subject={`Job Application: ${job.title}`}
+                        body={`Dear Hiring Manager,\n\nI am writing to apply for the ${job.title} position at Flexrite. I believe my skills and experience make me a strong candidate for this role.\n\nPlease find attached my resume and cover letter.\n\nThank you for considering my application. I look forward to the opportunity to discuss how I can contribute to your team.\n\nSincerely,\n[Your Name]`}
+                        className="font-source font-semibold text-3xl md:text-4xl text-black hover:text-gray-700 transition-all duration-200 relative group focus:outline-none focus:ring-2 focus:ring-black"
+                      >
                         <span className="group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4 transition-all duration-200">Apply</span>
-                      </button>
+                      </ContactButton>
                       <ArrowIcon />
                     </div>
-                  </div>
-                  {/* Divider - don't show after last item */}
-                  {index < filteredJobs.length - 1 && (
-                    <div className="w-full h-px bg-gray-300"></div>
-                  )}
-                </div>
-              ))}
-            </div>
+                    </motion.div>
+                    {/* Divider - don't show after last item */}
+                    {index < filteredJobs.length - 1 && (
+                      <motion.div 
+                        className="w-full h-px bg-gray-300"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ delay: 0.2 + (index * 0.1), duration: 0.5 }}
+                      ></motion.div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           </div>
 
           {/* Walk-Ins Interview Section */}

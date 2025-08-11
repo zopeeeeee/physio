@@ -52,6 +52,8 @@ export default function Portfolio() {
               src="/Flexrite.mp4"
               
               autoPlay
+              muted
+              controls
               className="w-full h-full object-cover rounded-[32px] lg:rounded-[63px]"
               poster="/Port1.avif"
             >

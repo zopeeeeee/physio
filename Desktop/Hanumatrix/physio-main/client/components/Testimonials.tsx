@@ -22,7 +22,7 @@ Where to add celebrity images:
 const cards: CardData[] = [
   {
     id: "1",
-    imageSrc: "/placeholder.svg?height=800&width=800",
+    imageSrc: "/BT.avif",
     quote:
       "Flexrite World has been my top choice for years. Whether it's any time, they are my first call.",
     author: "Bhavna Talwar",
@@ -30,7 +30,7 @@ const cards: CardData[] = [
   },
   {
     id: "2",
-    imageSrc: "/placeholder.svg?height=800&width=800",
+    imageSrc: "/JB.avif",
     quote:
       "Flexrite World offers the fastest pain relief, and I believe the doctors there have a magical touch. I can vouch.",
     author: "Jaya Bhattacharya",
@@ -38,7 +38,7 @@ const cards: CardData[] = [
   },
   {
     id: "3",
-    imageSrc: "/placeholder.svg?height=800&width=800",
+    imageSrc: "/CH.avif",
     quote:
       "After collaborating with many physiotherapy institutes, I can say Flexrite World offers the best pain relief.",
     author: "Chandrakant Handore",
@@ -46,7 +46,7 @@ const cards: CardData[] = [
   },
   {
     id: "4",
-    imageSrc: "/placeholder.svg?height=800&width=800",
+    imageSrc: "/AM.avif",
     quote:
       "Priyanka excels at her work; bring your loved ones to Flexrite. Health is biggest investment.",
     author: "Anupam Mittal",
@@ -54,7 +54,7 @@ const cards: CardData[] = [
   },
   {
     id: "5",
-    imageSrc: "/placeholder.svg?height=800&width=800",
+    imageSrc: "/AB.avif",
     quote:
       "Experiencing healing at Flexrite World is essential on my agenda, right alongside refreshments and rest.",
     author: "Abhishek Bachchan",
